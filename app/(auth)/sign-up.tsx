@@ -11,7 +11,7 @@ import { ReactNativeModal } from "react-native-modal";
 
 const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
-  const [showSuccessModal, setShoeSuccessModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [verification, setVerification] = useState({
     state: "default",
     error: "",
@@ -44,6 +44,7 @@ const SignUp = () => {
 
   const onPressVerify = async () => {
     if (!isLoaded) {
+      Alert.alert("---------- not loaded -----------");
       return;
     }
 
@@ -51,6 +52,7 @@ const SignUp = () => {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: verification.code,
       });
+      // Alert.alert(JSON.stringify(completeSignUp.status));
 
       if (completeSignUp.status === "complete") {
         //TODO: Create user in our database
@@ -126,11 +128,11 @@ const SignUp = () => {
           </Link>
         </View>
 
-        {/* Pending Modal */}
+        {/* Verification Modal */}
         <ReactNativeModal
           isVisible={verification.state === "pending"}
           onModalHide={() => {
-            setVerification({ ...verification, state: "success" });
+            if (verification.state === "success") setShowSuccessModal(true);
           }}
         >
           <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
@@ -166,8 +168,8 @@ const SignUp = () => {
           </View>
         </ReactNativeModal>
 
-        {/* Verification Modal */}
-        <ReactNativeModal isVisible={verification.state === "success"}>
+        {/* Successs Modal */}
+        <ReactNativeModal isVisible={showSuccessModal}>
           <View className="bg-white px-7 py-9 rounded-2xl min-h-[300px]">
             <Image
               source={images.check}
@@ -181,7 +183,10 @@ const SignUp = () => {
             </Text>
             <CustomButton
               title="Browse Home"
-              onPress={() => router.replace("/(root)/(tabs)/home")}
+              onPress={() => {
+                setShowSuccessModal(false);
+                router.push("/(root)/(tabs)/home");
+              }}
               className="mt-5"
             />
           </View>

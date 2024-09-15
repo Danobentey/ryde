@@ -6,7 +6,7 @@ export interface TokenCache {
   clearToken?: (key: string) => void;
 }
 
-const tokenCache = {
+export const tokenCache = {
   async getToken(key: string) {
     try {
       const item = await SecureStore.getItemAsync(key);
