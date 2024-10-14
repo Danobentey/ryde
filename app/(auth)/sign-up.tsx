@@ -8,6 +8,7 @@ import { Link, router } from "expo-router";
 import OAuth from "../components/OAuth";
 import { useSignUp } from "@clerk/clerk-expo";
 import { ReactNativeModal } from "react-native-modal";
+import { fetchAPI } from "@/lib/fetch";
 
 const SignUp = () => {
   const { isLoaded, signUp, setActive } = useSignUp();
@@ -44,7 +45,6 @@ const SignUp = () => {
 
   const onPressVerify = async () => {
     if (!isLoaded) {
-      Alert.alert("---------- not loaded -----------");
       return;
     }
 
@@ -52,10 +52,21 @@ const SignUp = () => {
       const completeSignUp = await signUp.attemptEmailAddressVerification({
         code: verification.code,
       });
-      // Alert.alert(JSON.stringify(completeSignUp.status));
 
       if (completeSignUp.status === "complete") {
-        //TODO: Create user in our database
+        try {
+          await fetchAPI("/(api)/user", {
+            method: "POST",
+            body: JSON.stringify({
+              name: form.name,
+              email: form.email,
+              clerkId: completeSignUp.createdUserId,
+            }),
+          });
+        } catch (err) {
+          console.error(JSON.stringify(err));
+        }
+
         await setActive({ session: completeSignUp.createdSessionId });
         setVerification({ ...verification, state: "success" });
       } else {
@@ -67,9 +78,11 @@ const SignUp = () => {
         console.error(JSON.stringify(completeSignUp, null, 2));
       }
     } catch (err: any) {
+      console.error(err.errors[0].longMessage);
       setVerification({
         ...verification,
-        state: "failed",
+        state:
+          err.errors[0].longMessage === "Incorrect code" ? "pending" : "failed",
         error: err.errors[0].longMessage,
       });
     }
