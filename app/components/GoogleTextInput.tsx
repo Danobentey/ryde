@@ -1,6 +1,6 @@
 import { GoogleInputProps } from "@/types/type";
 import { Text, View } from "react-native";
-import { GooglePlacesAutocomplete,  } from "react-native-google-places-autocomplete";
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 
 const GoogleTextInput = ({
   icon,
